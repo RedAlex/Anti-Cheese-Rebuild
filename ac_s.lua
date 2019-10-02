@@ -3,7 +3,7 @@ Components = {
 	Teleport = true,
 	GodMode = true,
 	Speedhack = true,
-	WeaponBlacklist = true,
+	WeaponBlacklist = false,
 	CustomFlag = true,
 }
 
@@ -32,18 +32,12 @@ anticheese:SetAllComponents( state )
 These can be used by triggering them like following:
 	TriggerEvent("anticheese:SetComponentStatus", "Teleport", false)
 
-Triggering these events from the clientside is not recommended as these get disabled globally and not just for one player.
-
+These Events CAN NOT be called from the clientside
 
 ]]
 
-
 Users = {}
 violations = {}
-
-
-
-
 
 RegisterServerEvent("anticheese:timer")
 AddEventHandler("anticheese:timer", function()
@@ -55,6 +49,12 @@ AddEventHandler("anticheese:timer", function()
 		end
 	else
 		Users[source] = os.time()
+	end
+end)
+
+AddEventHandler('es:playerLoaded',function(source)
+	if IsPlayerAceAllowed(source,"anticheese.bypass") then
+		TriggerClientEvent('bansql:anticheat', source, false)
 	end
 end)
 
@@ -90,7 +90,7 @@ AddEventHandler("anticheese:SetAllComponents", function(state)
 end)
 
 Citizen.CreateThread(function()
-	webhook = GetConvar("ac_webhook", "none")
+	webhook = Config.webhookban
 
 
 	function SendWebhookMessage(webhook,message)
@@ -107,10 +107,10 @@ Citizen.CreateThread(function()
 			if thePlayer.name == name then
 				isKnown = true
 				if violations[i].count == 3 then
-					TriggerEvent("banCheater", source,"Cheating")
+					--TriggerEvent("bansql:icheat", source)
 					isKnownCount = violations[i].count
 					table.remove(violations,i)
-					isKnownExtraText = ", was banned."
+					isKnownExtraText = ", @Staff Investigation requis."
 				else
 					violations[i].count = violations[i].count+1
 					isKnownCount = violations[i].count
@@ -157,7 +157,7 @@ Citizen.CreateThread(function()
 
 	RegisterServerEvent('AntiCheese:NoclipFlag')
 	AddEventHandler('AntiCheese:NoclipFlag', function(distance)
-		if Components.Speedhack and not IsPlayerAceAllowed(source,"anticheese.bypass") then
+		if Components.Teleport and not IsPlayerAceAllowed(source,"anticheese.bypass") then
 			license, steam = GetPlayerNeededIdentifiers(source)
 			name = GetPlayerName(source)
 
@@ -165,6 +165,21 @@ Citizen.CreateThread(function()
 
 
 			SendWebhookMessage(webhook,"**Noclip/Teleport!** \n```\nUser:"..name.."\n"..license.."\n"..steam.."\nCaught with "..distance.." units between last checked location\nAnticheat Flags:"..isKnownCount..""..isKnownExtraText.." ```")
+		end
+	end)
+	
+	
+	RegisterServerEvent('AntiCheese:MoneyFlag')
+	AddEventHandler('AntiCheese:MoneyFlag', function(money)
+		if not IsPlayerAceAllowed(source,"anticheese.bypass") then
+			license, steam = GetPlayerNeededIdentifiers(source)
+			name = GetPlayerName(source)
+
+--			isKnown, isKnownCount, isKnownExtraText = WarnPlayer(name,"Possible Money Cheat")
+
+
+			SendWebhookMessage(webhook,"**Anti-CheatMoney! ** \n```\nJoueur:"..name.."\n"..license.."\n"..steam.."\nA gagné "..money.."$ en une minutes.\n```")
+--			SendWebhookMessage(webhook,"**Possible Money Cheat!** \n```\nJoueur:"..name.."\n"..license.."\n"..steam.."\nA gagné "..money.."$ en une minutes.\nAnticheat Flags:"..isKnownCount..""..isKnownExtraText.." ```")
 		end
 	end)
 	
@@ -221,26 +236,4 @@ Citizen.CreateThread(function()
 			SendWebhookMessage(webhook,"**Inventory Hack!** \n```\nUser:"..name.."\n"..license.."\n"..steam.."\nGot Weapon: "..weapon.."( Blacklisted )\nAnticheat Flags:"..isKnownCount..""..isKnownExtraText.." ```")
 		end
 	end)
-end)
-
-local verFile = LoadResourceFile(GetCurrentResourceName(), "version.json")
-local curVersion = json.decode(verFile).version
-Citizen.CreateThread( function()
-	local updatePath = "/Bluethefurry/anticheese-anticheat"
-	local resourceName = "AntiCheese ("..GetCurrentResourceName()..")"
-	PerformHttpRequest("https://raw.githubusercontent.com"..updatePath.."/master/version.json", function(err, response, headers)
-		local data = json.decode(response)
-
-
-		if curVersion ~= data.version and tonumber(curVersion) < tonumber(data.version) then
-			print("\n--------------------------------------------------------------------------")
-			print("\n"..resourceName.." is outdated.\nCurrent Version: "..data.version.."\nYour Version: "..curVersion.."\nPlease update it from https://github.com"..updatePath.."")
-			print("\nUpdate Changelog:\n"..data.changelog)
-			print("\n--------------------------------------------------------------------------")
-		elseif tonumber(curVersion) > tonumber(data.version) then
-			print("Your version of "..resourceName.." seems to be higher than the current version.")
-		else
-			print(resourceName.." is up to date!")
-		end
-	end, "GET", "", {version = 'this'})
 end)
