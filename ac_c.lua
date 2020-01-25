@@ -17,18 +17,18 @@ Citizen.CreateThread(function()
 	ESX.PlayerData = ESX.GetPlayerData()
 end)
 
-RegisterNetEvent('bansql:anticheat')
-AddEventHandler('bansql:anticheat', function(data)
+RegisterNetEvent('anticheese:anticheat')
+AddEventHandler('anticheese:anticheat', function(data)
 	anticheat = data
 end)
 
-RegisterNetEvent('bansql:legitmoney')
-AddEventHandler('bansql:legitmoney', function(data)
+RegisterNetEvent('anticheese:legitmoney')
+AddEventHandler('anticheese:legitmoney', function(data)
 	money = money+data
 end)
 
-RegisterNetEvent('bansql:legitbank')
-AddEventHandler('bansql:legitbank', function(data)
+RegisterNetEvent('anticheese:legitbank')
+AddEventHandler('anticheese:legitbank', function(data)
 	bank = bank+data
 end)
 

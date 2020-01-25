@@ -54,7 +54,7 @@ end)
 
 AddEventHandler('es:playerLoaded',function(source)
 	if IsPlayerAceAllowed(source,"anticheese.bypass") then
-		TriggerClientEvent('bansql:anticheat', source, false)
+		TriggerClientEvent('anticheese:anticheat', source, false)
 	end
 end)
 
@@ -110,7 +110,7 @@ Citizen.CreateThread(function()
 					--TriggerEvent("bansql:icheat", source)
 					isKnownCount = violations[i].count
 					table.remove(violations,i)
-					isKnownExtraText = ", @Staff Investigation requis."
+					isKnownExtraText = ", @Staff Investigation is need."
 				else
 					violations[i].count = violations[i].count+1
 					isKnownCount = violations[i].count
